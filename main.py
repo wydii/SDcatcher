@@ -27,7 +27,21 @@ else :
         page.window.width = 500
         page.window.alignment= ft.alignment.center
         
-        MAIN_COLOR = ft.colors.TEAL_400
+        MAIN_COLOR = ft.colors.INDIGO_300
+        SECOND_COLOR = ft.colors.INDIGO_300
+
+        ##################################### ACTION BUTTON - ADD MAPPING #######################
+
+        page.floating_action_button = ft.FloatingActionButton(
+        content=ft.Row(
+            [ft.Icon(ft.icons.ADD,color=ft.colors.WHITE), ft.Text("Add Mapping",color=ft.colors.WHITE)], alignment="center", spacing=5
+        ),
+        bgcolor=MAIN_COLOR,
+        shape=ft.RoundedRectangleBorder(radius=5),
+        width=200,
+        mini=True,
+    )
+
 
         ##################################### SETTINGS LOADER ###################################
         
@@ -44,7 +58,13 @@ else :
             icon = ft.icons.PHOTO_CAMERA if type=="photo" else ft.icons.MOVIE
             description = "Picture Mapping" if type =="photo" else "Video Mapping"
 
-
+            styleDict = [("Source :",source),("Destination :",destination),("Format :",format)]
+            ListTiles = []
+            for tup in styleDict :
+                ListTiles.append(ft.ListTile(
+                                    title=ft.Row([ft.OutlinedButton(text=tup[0],style=ft.ButtonStyle(padding=5,shape=ft.RoundedRectangleBorder(radius=5),side=ft.BorderSide(color=SECOND_COLOR,width=2),color=SECOND_COLOR)),
+                                                  ft.Text(tup[1],size=10,weight=ft.FontWeight.W_100)])
+                                ))
             mapTabs.append(ft.ExpansionTile(
                     title=ft.ListTile(leading=ft.Icon(icon),
                                     title=ft.Text(name),
@@ -59,65 +79,20 @@ else :
                     affinity=ft.TileAffinity.LEADING,
                     icon_color=MAIN_COLOR,
                     text_color=MAIN_COLOR,
-                    controls=[
-                        ft.ListTile(
-                            #title=ft.Text("Source : " ,weight=ft.FontWeight.BOLD, spans=[ft.TextSpan(source,ft.TextStyle(weight=ft.FontWeight.NORMAL))])
-                            title=ft.Row([ft.FilledTonalButton(text="Source :",style=ft.ButtonStyle(padding=4)),ft.Text(source)])
-                            ),
-                        ft.ListTile(
-                            #title=ft.Text("Destination : ",weight=ft.FontWeight.BOLD, spans=[ft.TextSpan(destination,ft.TextStyle(weight=ft.FontWeight.NORMAL))])
-                            title=ft.Row([ft.FilledTonalButton(text="Destination :",style=ft.ButtonStyle(padding=4)),ft.Text(destination)])
-                            
-    
-                            ),
-                        ft.ListTile(
-                            #title=ft.Text("Format : ",weight=ft.FontWeight.BOLD, spans=[ft.TextSpan(format,ft.TextStyle(weight=ft.FontWeight.NORMAL))])
-                            title=ft.Row([ft.FilledTonalButton(text="Format :",style=ft.ButtonStyle(padding=8)),ft.Text(format)])
-                            ),
-                    ],
+                    controls=ListTiles,
                 ))
 
 
         ############################## FUNCTION FOR MAPPING ADDER ###############################
 
-        def selectedVideo(e) :
-            addType = "video"
-            wizard.value = "Please insert your SD card and choose the "+addType+" source folder"
-            typeWizard.name = ft.icons.MOVIE
-            page.update()
-
-        def selectedPhoto(e) :
-            addType = "photo"
-            wizard.value = "Please insert your SD card and choose the "+addType+" source folder"
-            typeWizard.name = ft.icons.PHOTO_CAMERA
-            page.update()
-
+        
 
         #############################  FILE PICKER   #####################################
         
-
-        # Open directory dialog
-        def get_directory_result(e: FilePickerResultEvent):
-            if e.path :
-                sourcePath = e.path
-                wizard.value = "You chose : "+sourcePath+" \nNow choose destination folder"
-
-            else :
-                wizard.value = "You've canceled your choice, please try again"
-            page.update()
-
         
 
         
         ##################################### VARIABLE FOR MAPPING ADDER ################################################
-
-        wizard = ft.Text(value="Please select one")
-        typeWizard = ft.Icon()
-
-        get_directory_dialog = FilePicker(on_result=get_directory_result)
-        directory_path = Text()
-        sourcePath = None
-        addType = None
 
 
 
@@ -158,8 +133,7 @@ else :
 
 
         ##################################  TABS   ############################################
-        # hide all dialogs in overlay
-        page.overlay.extend([get_directory_dialog])
+       
 
         t = ft.Tabs(
             selected_index=0,
@@ -176,22 +150,10 @@ else :
                     
                 ),
                 ft.Tab(
-                    text="Add new Mapping",
-                    icon=ft.icons.ADD,
+                    text="Feedback",
+                    icon=ft.icons.FEEDBACK,
                     content=ft.Column(
                         [
-                            ft.Row([
-                                ft.TextButton("Photo Mapping",icon=ft.icons.PHOTO_CAMERA, on_click=selectedPhoto),
-                                ft.TextButton(text="Video Mapping",icon=ft.icons.MOVIE, on_click=selectedVideo),
-                                    ],alignment=ft.MainAxisAlignment.CENTER),
-                            typeWizard,
-                            ElevatedButton(
-                                    "Open directory",
-                                    icon=icons.FOLDER_OPEN,
-                                    on_click=lambda _: get_directory_dialog.get_directory_path(),
-                                    disabled=page.web, ),
-                            directory_path,
-                            wizard,
                                     
                         ]
                         
