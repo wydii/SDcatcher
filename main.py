@@ -1,13 +1,5 @@
 import flet as ft
-from flet import (
-    ElevatedButton,
-    FilePicker,
-    FilePickerResultEvent,
-    Page,
-    Row,
-    Text,
-    icons,
-)
+from flet import *
 import launcher,dialog,settings
 import os,sys
 
@@ -74,14 +66,41 @@ else :
                                             ft.PopupMenuItem(text="Modify",icon=ft.icons.EDIT),
                                             ft.PopupMenuItem(text="Remove",icon=ft.icons.REMOVE),
                                         ],
-                                    ),),
+                                    )),
                     subtitle=ft.Text(description),
                     affinity=ft.TileAffinity.LEADING,
                     icon_color=MAIN_COLOR,
                     text_color=MAIN_COLOR,
                     controls=ListTiles,
                 ))
-
+        
+        # Empty Mappings Display
+        if not mapTabs :
+            mapTabs.append(
+                ft.Column(
+                    spacing=10,
+                    controls=[
+                        ft.Card(
+                            content=ft.Container(
+                                content=ft.Column([
+                                        ft.ListTile(
+                                            leading=ft.Icon(ft.icons.SD_CARD_ALERT_OUTLINED),
+                                            title=ft.Text("Create your first Mapping !"),
+                                            subtitle=ft.Container(content=ft.Text(
+                                                "Click on the button down there to create your first SD card automation." ),padding=ft.padding.symmetric(vertical=10))
+                                        )]),   
+                                padding=20,
+                                ),
+                            elevation=1,
+                            color=ft.colors.INDIGO_50,
+                            margin=ft.margin.only(top=60),
+                            clip_behavior=ft.ClipBehavior.HARD_EDGE
+                        ),
+                        ft.Row(
+                            [ft.Container(ft.Icon(name=icons.ARROW_RIGHT_ALT,size=65,color=ft.colors.INDIGO_100),rotate=3.14/2)],
+                            alignment=ft.MainAxisAlignment.END
+                            )
+                    ]))
 
         ############################## FUNCTION FOR MAPPING ADDER ###############################
 
