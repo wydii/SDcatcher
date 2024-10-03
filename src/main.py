@@ -14,25 +14,16 @@ if len(sys.argv) >1 and sys.argv[1] == "dialog" :
 
 else :
 
+     
+    
+            
+
     def main(page: ft.Page):
         
         page.window.width = 500
         page.window.alignment= ft.alignment.center
-        
         MAIN_COLOR = ft.colors.INDIGO_300
         SECOND_COLOR = ft.colors.INDIGO_300
-
-        ##################################### ACTION BUTTON - ADD MAPPING #######################
-
-        page.floating_action_button = ft.FloatingActionButton(
-        content=ft.Row(
-            [ft.Icon(ft.icons.ADD,color=ft.colors.WHITE), ft.Text("Add Mapping",color=ft.colors.WHITE)], alignment="center", spacing=5
-        ),
-        bgcolor=MAIN_COLOR,
-        shape=ft.RoundedRectangleBorder(radius=5),
-        width=200,
-        mini=True,
-    )
 
 
         ##################################### SETTINGS LOADER ###################################
@@ -102,6 +93,34 @@ else :
                             )
                     ]))
 
+        ##################################### MODALS ################################################
+        uptodate = ft.AlertDialog(
+                modal=True,
+                title=ft.Text("Please confirm"),
+                content=ft.Text("Do you really want to delete all those files?"),
+                actions=[
+                    ft.TextButton("Yes", on_click=lambda e: page.close(uptodate)),
+                    ft.TextButton("No", on_click=lambda e: page.close(uptodate)),
+                ],
+                actions_alignment=ft.MainAxisAlignment.END,
+                on_dismiss=lambda e: page.add(
+                    ft.Text("Modal dialog dismissed"),
+                ),
+            )
+        ##################################### ACTION BUTTON - ADD MAPPING #######################
+
+        page.floating_action_button = ft.FloatingActionButton(
+        content=ft.Row(
+            [ft.Icon(ft.icons.ADD,color=ft.colors.WHITE), ft.Text("Add Mapping",color=ft.colors.WHITE)], alignment="center", spacing=5
+        ),
+        bgcolor=MAIN_COLOR,
+        shape=ft.RoundedRectangleBorder(radius=5),
+        width=200,
+        mini=True,
+    )
+
+
+        
         ############################## FUNCTION FOR MAPPING ADDER ###############################
 
         
@@ -111,24 +130,13 @@ else :
         
 
         
-        ##################################### VARIABLE FOR MAPPING ADDER ################################################
-
+       
+            
 
 
         ############################## APP BAR ##################################################
         #### Check update
-        uptodate = ft.AlertDialog(
-            title=ft.Text("Check if there is a new update of SdCatcher "),
-            
-            content=ft.Column([
-                ft.Row([
-                    ft.Chip(
-                        label=ft.Text("Current vesion : ",
-                            spans=[ft.TextSpan(versionData,ft.TextStyle(weight=ft.FontWeight.BOLD))]),
-                        bgcolor= ft.colors.LIGHT_GREEN_ACCENT_100)
-                ],alignment=ft.MainAxisAlignment.CENTER)
-            ],height="40%")
-        )
+        
 
         page.appbar = ft.AppBar(
             leading=ft.Icon(ft.icons.SD_CARD_SHARP,color=MAIN_COLOR),
@@ -142,7 +150,7 @@ else :
                     items=[
                         ft.PopupMenuItem(text="Settings",icon=ft.icons.SETTINGS),
                         ft.PopupMenuItem(text="Github",icon=ft.icons.WEB),
-                        ft.PopupMenuItem(text="Check update",icon=ft.icons.UPDATE,on_click=lambda e: page.open(uptodate)),
+                        ft.PopupMenuItem(text="Check update",icon=ft.icons.UPDATE,on_click=lambda e:  page.open(uptodate)),
                     ]
                 ),
             ],
