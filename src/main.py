@@ -1,7 +1,7 @@
 import flet as ft
 from flet import *
 import launcher,dialog,settings
-import os,sys
+import os,sys,time
 
 # Get the path of the currently running Python interpreter
 python_binary = sys.executable
@@ -13,11 +13,6 @@ if len(sys.argv) >1 and sys.argv[1] == "dialog" :
     dialog.dialog()
 
 else :
-
-     
-    
-            
-
     def main(page: ft.Page):
         
         page.window.width = 500
@@ -94,18 +89,30 @@ else :
                     ]))
 
         ##################################### MODALS ################################################
+        updateTile = ft.ListTile(
+                            leading= ft.Icon(ft.icons.UPDATE_OUTLINED),
+                            title=ft.Text("Update manager"),
+                            subtitle=ft.Text("Current version : ",[ft.TextSpan(versionData,style=TextStyle(weight=FontWeight.BOLD))]))
+        updateActions = [
+                    ft.TextButton("Close", on_click=lambda e: page.close(uptodate)),
+                    ft.OutlinedButton("Check for update", on_click=lambda e: getUpdate(page))
+                ]
+        def getUpdate(page : ft.Page) :
+            updateTile.leading = ft.ProgressRing(width=21, height=21)
+            updateActions[1].text= "Fetching ..."
+            updateActions[1].disabled = True
+            page.update()
+            time.sleep(5)
+            updateTile.leading = ft.Icon(ft.icons.UPDATE_OUTLINED) 
+            updateActions[1].text= "Check for update"
+            updateActions[1].disabled = False
+            page.update()
         uptodate = ft.AlertDialog(
-                modal=True,
-                title=ft.Text("Please confirm"),
-                content=ft.Text("Do you really want to delete all those files?"),
-                actions=[
-                    ft.TextButton("Yes", on_click=lambda e: page.close(uptodate)),
-                    ft.TextButton("No", on_click=lambda e: page.close(uptodate)),
-                ],
+                
+                content=updateTile,
+                actions=updateActions,
                 actions_alignment=ft.MainAxisAlignment.END,
-                on_dismiss=lambda e: page.add(
-                    ft.Text("Modal dialog dismissed"),
-                ),
+                
             )
         ##################################### ACTION BUTTON - ADD MAPPING #######################
 
