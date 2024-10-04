@@ -1,5 +1,5 @@
-import os
-import json
+import os, json, uuid
+import flet as ft
 from platforms import getPlatform
 
 # Cross-platform settings file path
@@ -14,6 +14,8 @@ VERSION = "0.5"
 DEFAULT_SETTINGS = {
         "mappings": [],
         "showDialog": "true",
+        "autoEject": "false",
+        "playSound": "false",
         "version": VERSION
     }
 
@@ -76,43 +78,48 @@ def createNewMapping(name, sourcePath, destinationPath, type, format):
     settings = load()
     
     new_mapping = {
+        "uuid": str(uuid.uuid4()),
         "name": name,
         "sourcePath": sourcePath,
         "destinationPath": destinationPath,
         "type": type,
         "format": format
     }
-    
     settings["mappings"].append(new_mapping)
     saveSettings(settings)
     print(f"Mapping '{name}' created successfully.")
 
-def modifyMapping(name, sourcePath, type, new_mapping):
-    """Modifies an existing mapping by name, sourcePath, and type."""
+def modifyMapping(uuid, new_mapping):
+    """Modifies an existing mapping by uuid."""
     settings = load()
     
     for mapping in settings["mappings"]:
-        if mapping["name"] == name and mapping["sourcePath"] == sourcePath and mapping["type"] == type:
+        if mapping["uuid"] == uuid :
+            name = mapping["name"]
             mapping.update(new_mapping)
             saveSettings(settings)
-            print(f"Mapping '{name}' with source '{sourcePath}' and type '{type}' modified successfully.")
+            print(f"Mapping '{name}' modified successfully.")
             return
     
-    print(f"Mapping with name '{name}', source '{sourcePath}', and type '{type}' not found.")
+    print(f"Mapping not found.")
 
-def removeMapping(name, sourcePath, type):
-    """Removes a mapping by name, sourcePath, and type."""
+def removeMapping(uuid):
+    """Removes a mapping by uuid."""
     settings = load()
+    newMappings = []
+    for mapping in settings["mappings"] :
+        if mapping["uuid"] != uuid :
+            print("we are keeping ",mapping["name"]," of type ", mapping["type"])
+            newMappings.append(mapping)
     
-    updated_mappings = [m for m in settings["mappings"] if not (
-        m["name"] == name and m["sourcePath"] == sourcePath and m["type"] == type)]
-    
-    if len(updated_mappings) == len(settings["mappings"]):
-        print(f"Mapping with name '{name}', source '{sourcePath}', and type '{type}' not found.")
+    if len(newMappings) == len(settings["mappings"]):
+        print(f"Mapping not found.")
     else:
-        settings["mappings"] = updated_mappings
+        
+        settings["mappings"] = newMappings
         saveSettings(settings)
-        print(f"Mapping '{name}' with source '{sourcePath}' and type '{type}' removed successfully.")
+        print("Mapping ",uuid," removed successfully.")
+        
 
 
 

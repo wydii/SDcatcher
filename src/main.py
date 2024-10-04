@@ -20,81 +20,108 @@ else :
         MAIN_COLOR = ft.colors.INDIGO_300
         SECOND_COLOR = ft.colors.INDIGO_300
 
+       
+        def showNotification(notificationMessage) :
+            snackbar = ft.SnackBar(
+                content=ft.Text(notificationMessage,color=ft.colors.BLACK),
+                action="Undo",
+                bgcolor=ft.colors.INDIGO_50)
+            page.overlay.append(snackbar)
+            snackbar.open=True
+            page.update()
 
+        ##################################### MAPPING CONTROLS ##################################
+        def updateMappings() :
+            t.tabs[0].content=ft.Column(dataLoader()[0],scroll=ft.ScrollMode.ADAPTIVE)
+            page.update()
+        
+        def fooCreate() :
+            settings.createNewMapping("ZV1","/Volumes/ZV1/PRIVATE/M4ROOT/CLIP/","/Users/yehdar/Pictures/ZV1/CLIPS/","video",".mp4")
+            settings.createNewMapping("ZV1","/Volumes/ZV1/DCIM/100MSDCF/","/Users/yehdar/Pictures/ZV1/PICS/","photo",".jpg")
+            updateMappings()
+            showNotification("Mappings Created")
+        
+        def removeMapping(uuid,name) :
+            settings.removeMapping(uuid)
+            updateMappings()
+            showNotification("Removed mapping for "+name)
         ##################################### SETTINGS LOADER ###################################
-        
-        data = settings.load()
-        versionData = data["version"]
-        mapTabs = []
-        for mapping in data["mappings"] :
-            name = mapping["name"]
-            source = mapping["sourcePath"]
-            destination = mapping["destinationPath"]
-            type = mapping["type"]
-            format = mapping["format"]
+        def dataLoader() :
+            data = settings.load()
+            versionData = data["version"]
+            mapTabs = []
+            for mapping in data["mappings"] :
+                uuid = mapping["uuid"]
+                name = mapping["name"]
+                source = mapping["sourcePath"]
+                destination = mapping["destinationPath"]
+                type = mapping["type"]
+                format = mapping["format"]
 
-            icon = ft.icons.PHOTO_CAMERA if type=="photo" else ft.icons.MOVIE
-            description = "Picture Mapping" if type =="photo" else "Video Mapping"
+                icon = ft.icons.PHOTO_CAMERA if type=="photo" else ft.icons.MOVIE
+                description = "Picture Mapping" if type =="photo" else "Video Mapping"
 
-            styleDict = [("Source :",source),("Destination :",destination),("Format :",format)]
-            ListTiles = []
-            for tup in styleDict :
-                ListTiles.append(ft.ListTile(
-                                    title=ft.Row([ft.OutlinedButton(text=tup[0],style=ft.ButtonStyle(padding=5,shape=ft.RoundedRectangleBorder(radius=5),side=ft.BorderSide(color=SECOND_COLOR,width=2),color=SECOND_COLOR)),
-                                                  ft.Text(tup[1],size=10,weight=ft.FontWeight.W_100)])
-                                ))
-            mapTabs.append(ft.ExpansionTile(
-                    title=ft.ListTile(leading=ft.Icon(icon),
-                                    title=ft.Text(name),
-                                    trailing=ft.PopupMenuButton(
-                                    icon=ft.icons.MORE_VERT,
-                                        items=[
-                                            ft.PopupMenuItem(text="Modify",icon=ft.icons.EDIT),
-                                            ft.PopupMenuItem(text="Remove",icon=ft.icons.REMOVE),
-                                        ],
-                                    )),
-                    subtitle=ft.Text(description),
-                    affinity=ft.TileAffinity.LEADING,
-                    icon_color=MAIN_COLOR,
-                    text_color=MAIN_COLOR,
-                    controls=ListTiles,
-                ))
-        
-        # Empty Mappings Display
-        if not mapTabs :
-            mapTabs.append(
-                ft.Column(
-                    spacing=10,
-                    controls=[
-                        ft.Card(
+                styleDict = [("Source :",source),("Destination :",destination),("Format :",format)]
+                ListTiles = []
+                for tup in styleDict :
+                    ListTiles.append(ft.ListTile(
+                                        title=ft.Row([ft.OutlinedButton(text=tup[0],style=ft.ButtonStyle(padding=5,shape=ft.RoundedRectangleBorder(radius=5),side=ft.BorderSide(color=SECOND_COLOR,width=2),color=SECOND_COLOR)),
+                                                    ft.Text(tup[1],size=10,weight=ft.FontWeight.W_100)])
+                                    ))
+                mapTabs.append(ft.ExpansionTile(
+                        title=ft.ListTile(leading=ft.Icon(icon),
+                                        title=ft.Text(name),
+                                        trailing=ft.PopupMenuButton(
+                                        icon=ft.icons.MORE_VERT,
+                                            items=[
+                                                ft.PopupMenuItem(text="Modify",icon=ft.icons.EDIT),
+                                                ft.PopupMenuItem(text="Remove",icon=ft.icons.REMOVE,on_click=lambda e: removeMapping(uuid,name)),
+                                            ],
+                                        )),
+                        subtitle=ft.Text(description),
+                        affinity=ft.TileAffinity.LEADING,
+                        icon_color=MAIN_COLOR,
+                        text_color=MAIN_COLOR,
+                        controls=ListTiles,
+                    ))
+            if not mapTabs :
+                mapTabs.append( ft.Column(spacing=10,controls=[ft.Card(
                             content=ft.Container(
                                 content=ft.Column([
                                         ft.ListTile(
-                                            leading=ft.Icon(ft.icons.SD_CARD_ALERT_OUTLINED),
-                                            title=ft.Text("Create your first Mapping !"),
+                                            leading=ft.Icon(ft.icons.SD_CARD_ALERT_OUTLINED,color=ft.colors.BLACK),
+                                            title=ft.Text("Create your first Mapping !",color=ft.colors.BLACK),
                                             subtitle=ft.Container(content=ft.Text(
-                                                "Click on the button down there to create your first SD card automation." ),padding=ft.padding.symmetric(vertical=10))
+                                                "Click on the button down there to create your first SD card automation.",color=ft.colors.BLACK ),padding=ft.padding.symmetric(vertical=10))
                                         )]),   
                                 padding=20,
                                 ),
                             elevation=1,
-                            color=ft.colors.INDIGO_50,
+                            color=ft.colors.INDIGO_100,
                             margin=ft.margin.only(top=60),
-                            clip_behavior=ft.ClipBehavior.HARD_EDGE
-                        ),
+                            clip_behavior=ft.ClipBehavior.HARD_EDGE),
                         ft.Row(
                             [ft.Container(ft.Icon(name=icons.ARROW_RIGHT_ALT,size=65,color=ft.colors.INDIGO_100),rotate=3.14/2)],
                             alignment=ft.MainAxisAlignment.END
-                            )
-                    ]))
+                            )]))
+            return (mapTabs,versionData)
+        
+        
+        
+        
+        
+       
+        
 
         ##################################### MODALS ################################################
+        ####### UPDATE MANAGER
+        versionData = dataLoader()[1]
         updateTile = ft.ListTile(
                             leading= ft.Icon(ft.icons.UPDATE_OUTLINED),
                             title=ft.Text("Update manager"),
                             subtitle=ft.Text("Current version : ",[ft.TextSpan(versionData,style=TextStyle(weight=FontWeight.BOLD))]))
         updateActions = [
-                    ft.TextButton("Close", on_click=lambda e: page.close(uptodate)),
+                    ft.TextButton("Close", on_click=lambda e: page.close(updateManager)),
                     ft.OutlinedButton("Check for update", on_click=lambda e: getUpdate(page))
                 ]
         def getUpdate(page : ft.Page) :
@@ -107,15 +134,14 @@ else :
             updateActions[1].text= "Check for update"
             updateActions[1].disabled = False
             page.update()
-        uptodate = ft.AlertDialog(
-                
+        updateManager = ft.AlertDialog(
                 content=updateTile,
                 actions=updateActions,
                 actions_alignment=ft.MainAxisAlignment.END,
-                
             )
+        
         ##################################### ACTION BUTTON - ADD MAPPING #######################
-
+        
         page.floating_action_button = ft.FloatingActionButton(
         content=ft.Row(
             [ft.Icon(ft.icons.ADD,color=ft.colors.WHITE), ft.Text("Add Mapping",color=ft.colors.WHITE)], alignment="center", spacing=5
@@ -124,26 +150,9 @@ else :
         shape=ft.RoundedRectangleBorder(radius=5),
         width=200,
         mini=True,
-    )
-
-
-        
-        ############################## FUNCTION FOR MAPPING ADDER ###############################
-
-        
-
-        #############################  FILE PICKER   #####################################
-        
-        
-
-        
-       
-            
-
-
-        ############################## APP BAR ##################################################
-        #### Check update
-        
+        on_click=lambda e: fooCreate()
+    )        
+        ############################## APP BAR ##################################################        
 
         page.appbar = ft.AppBar(
             leading=ft.Icon(ft.icons.SD_CARD_SHARP,color=MAIN_COLOR),
@@ -157,7 +166,7 @@ else :
                     items=[
                         ft.PopupMenuItem(text="Settings",icon=ft.icons.SETTINGS),
                         ft.PopupMenuItem(text="Github",icon=ft.icons.WEB),
-                        ft.PopupMenuItem(text="Check update",icon=ft.icons.UPDATE,on_click=lambda e:  page.open(uptodate)),
+                        ft.PopupMenuItem(text="Check update",icon=ft.icons.UPDATE,on_click=lambda e:  page.open(updateManager)),
                     ]
                 ),
             ],
@@ -179,7 +188,7 @@ else :
                 ft.Tab(
                     text="My Mappings",
                     icon=ft.icons.LIST_ALT,
-                    content=ft.Column(mapTabs,scroll=ft.ScrollMode.ADAPTIVE),
+                    content=ft.Column(dataLoader()[0],scroll=ft.ScrollMode.ADAPTIVE),
                     
                     
                 ),
