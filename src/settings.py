@@ -71,7 +71,7 @@ def showDialog():
     settings = load()
     return settings.get("showDialog", "false").lower() == "true"
 
-############################    CREATE, MODIFY & REMOVE     ##############################################################
+############################    CREATE, MODIFY, REMOVE & GET    ##############################################################
 
 def createNewMapping(name, sourcePath, destinationPath, type, format):
     """Adds a new mapping to the settings."""
@@ -109,7 +109,6 @@ def removeMapping(uuid):
     newMappings = []
     for mapping in settings["mappings"] :
         if mapping["uuid"] != uuid :
-            print("we are keeping ",mapping["name"]," of type ", mapping["type"])
             newMappings.append(mapping)
     
     if len(newMappings) == len(settings["mappings"]):
@@ -119,10 +118,13 @@ def removeMapping(uuid):
         settings["mappings"] = newMappings
         saveSettings(settings)
         print("Mapping ",uuid," removed successfully.")
-        
 
-
-
+def getMapping(uuid) :
+    settings = load()
+    for mapping in settings["mappings"] :
+        if mapping["uuid"] == uuid :
+            return mapping
+    print(f"Mapping not found.")
 ############################    IMPORT & EXPORT     ##############################################################
 
 def importSettings(json_file_path):
@@ -153,3 +155,4 @@ def exportSettings(export_directory):
     print(f"Settings exported to '{export_directory}' successfully.")
 
 
+removeMapping("e79152f5-06c6-4fe9-87c2-c7807f5a07f2")

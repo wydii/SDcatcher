@@ -19,20 +19,35 @@ else :
         page.window.alignment= ft.alignment.center
         MAIN_COLOR = ft.colors.INDIGO_300
         SECOND_COLOR = ft.colors.INDIGO_300
+        mapTabs = []
+        
+        versionData = settings.load()["version"]
 
-       
-        def showNotification(notificationMessage) :
+        def showNotification(notificationMessage,undo=None) :
+            def undoManager(e,undo) :
+                undo(e)
+                updateMappings()
+            textContent = ft.Text(notificationMessage,color=ft.colors.BLACK)
+            undoButton = ft.TextButton("Undo",icon=ft.icons.UNDO_OUTLINED,style=ButtonStyle(),on_click=lambda e:undoManager(e,undo))
             snackbar = ft.SnackBar(
-                content=ft.Text(notificationMessage,color=ft.colors.BLACK),
-                action="Undo",
-                bgcolor=ft.colors.INDIGO_50)
+                content="",
+                bgcolor=ft.colors.BLUE_GREY_100,
+                show_close_icon=True,
+                close_icon_color=ft.colors.BLACK,
+                behavior=ft.SnackBarBehavior.FLOATING)
+            if undo!=None :
+                snackbar.content=ft.Row([textContent,undoButton],alignment=ft.MainAxisAlignment.START)
+            else :
+                snackbar.content = ft.Row([textContent],alignment=ft.MainAxisAlignment.START)
+                
             page.overlay.append(snackbar)
             snackbar.open=True
             page.update()
 
         ##################################### MAPPING CONTROLS ##################################
         def updateMappings() :
-            t.tabs[0].content=ft.Column(dataLoader()[0],scroll=ft.ScrollMode.ADAPTIVE)
+            dataLoader()
+            t.tabs[0].content=ft.Column(mapTabs,scroll=ft.ScrollMode.ADAPTIVE)
             page.update()
         
         def fooCreate() :
@@ -41,26 +56,34 @@ else :
             updateMappings()
             showNotification("Mappings Created")
         
-        def removeMapping(uuid,name) :
+        def removeMapping(uuid) :
+            print("Got a signal to delete UUID : ",uuid)
+            mapping = settings.getMapping(uuid)
+            undo = lambda e: settings.createNewMapping(mapping["name"], mapping["sourcePath"], mapping["destinationPath"], mapping["type"], mapping["format"])
             settings.removeMapping(uuid)
             updateMappings()
-            showNotification("Removed mapping for "+name)
+            showNotification("Removed mapping for "+mapping["name"]+" of type "+mapping["type"],undo)
         ##################################### SETTINGS LOADER ###################################
+        
+
         def dataLoader() :
-            data = settings.load()
-            versionData = data["version"]
-            mapTabs = []
+            mapTabs.clear()
+            data = settings.load()            
             for mapping in data["mappings"] :
+                
                 uuid = mapping["uuid"]
                 name = mapping["name"]
                 source = mapping["sourcePath"]
                 destination = mapping["destinationPath"]
                 type = mapping["type"]
                 format = mapping["format"]
-
+                
                 icon = ft.icons.PHOTO_CAMERA if type=="photo" else ft.icons.MOVIE
                 description = "Picture Mapping" if type =="photo" else "Video Mapping"
 
+                removeLambda = lambda e, uuid=uuid: removeMapping(uuid)
+               
+                
                 styleDict = [("Source :",source),("Destination :",destination),("Format :",format)]
                 ListTiles = []
                 for tup in styleDict :
@@ -75,7 +98,7 @@ else :
                                         icon=ft.icons.MORE_VERT,
                                             items=[
                                                 ft.PopupMenuItem(text="Modify",icon=ft.icons.EDIT),
-                                                ft.PopupMenuItem(text="Remove",icon=ft.icons.REMOVE,on_click=lambda e: removeMapping(uuid,name)),
+                                                ft.PopupMenuItem(text="Remove",icon=ft.icons.REMOVE,on_click=removeLambda),
                                             ],
                                         )),
                         subtitle=ft.Text(description),
@@ -104,7 +127,6 @@ else :
                             [ft.Container(ft.Icon(name=icons.ARROW_RIGHT_ALT,size=65,color=ft.colors.INDIGO_100),rotate=3.14/2)],
                             alignment=ft.MainAxisAlignment.END
                             )]))
-            return (mapTabs,versionData)
         
         
         
@@ -115,7 +137,6 @@ else :
 
         ##################################### MODALS ################################################
         ####### UPDATE MANAGER
-        versionData = dataLoader()[1]
         updateTile = ft.ListTile(
                             leading= ft.Icon(ft.icons.UPDATE_OUTLINED),
                             title=ft.Text("Update manager"),
@@ -188,7 +209,7 @@ else :
                 ft.Tab(
                     text="My Mappings",
                     icon=ft.icons.LIST_ALT,
-                    content=ft.Column(dataLoader()[0],scroll=ft.ScrollMode.ADAPTIVE),
+                    content=ft.Column(mapTabs,scroll=ft.ScrollMode.ADAPTIVE),
                     
                     
                 ),
