@@ -19,13 +19,16 @@ else :
         page.window.alignment= ft.alignment.center
         MAIN_COLOR = ft.colors.INDIGO_300
         SECOND_COLOR = ft.colors.INDIGO_300
-        mapTabs = []
         
+
         versionData = settings.load()["version"]
 
         def showNotification(notificationMessage,undo=None) :
             def undoManager(e,undo) :
                 undo(e)
+                snackbar.duration=1
+                snackbar.show_close_icon=False
+                snackbar.open=True
                 updateMappings()
             textContent = ft.Text(notificationMessage,color=ft.colors.BLACK)
             undoButton = ft.TextButton("Undo",icon=ft.icons.UNDO_OUTLINED,style=ButtonStyle(),on_click=lambda e:undoManager(e,undo))
@@ -33,8 +36,9 @@ else :
                 content="",
                 bgcolor=ft.colors.BLUE_GREY_100,
                 show_close_icon=True,
-                close_icon_color=ft.colors.BLACK,
-                behavior=ft.SnackBarBehavior.FLOATING)
+                close_icon_color=ft.colors.BLACK,                
+                #behavior=ft.SnackBarBehavior.FLOATING
+                )
             if undo!=None :
                 snackbar.content=ft.Row([textContent,undoButton],alignment=ft.MainAxisAlignment.START)
             else :
@@ -47,7 +51,7 @@ else :
         ##################################### MAPPING CONTROLS ##################################
         def updateMappings() :
             dataLoader()
-            t.tabs[0].content=ft.Column(mapTabs,scroll=ft.ScrollMode.ADAPTIVE)
+            t.tabs[0].content=ft.Column(dataLoader(),scroll=ft.ScrollMode.ADAPTIVE)
             page.update()
         
         def fooCreate() :
@@ -67,8 +71,8 @@ else :
         
 
         def dataLoader() :
-            mapTabs.clear()
-            data = settings.load()            
+            mapTabs = []
+            data = settings.load()     
             for mapping in data["mappings"] :
                 
                 uuid = mapping["uuid"]
@@ -127,6 +131,7 @@ else :
                             [ft.Container(ft.Icon(name=icons.ARROW_RIGHT_ALT,size=65,color=ft.colors.INDIGO_100),rotate=3.14/2)],
                             alignment=ft.MainAxisAlignment.END
                             )]))
+            return mapTabs
         
         
         
@@ -209,7 +214,7 @@ else :
                 ft.Tab(
                     text="My Mappings",
                     icon=ft.icons.LIST_ALT,
-                    content=ft.Column(mapTabs,scroll=ft.ScrollMode.ADAPTIVE),
+                    content=ft.Column(dataLoader(),scroll=ft.ScrollMode.ADAPTIVE),
                     
                     
                 ),
