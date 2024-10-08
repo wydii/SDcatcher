@@ -20,13 +20,39 @@ else :
         MAIN_COLOR = ft.colors.INDIGO_300
         SECOND_COLOR = ft.colors.INDIGO_300
         
-
         versionData = settings.load()["version"]
+        showDialog = settings.load()["showDialog"]
+        autoEject = settings.load()["autoEject"]
+        playSound = settings.load()["playSound"]
         launcherButton = ft.TextButton()
+
+
+        def settingsUpdate() :
+            versionData = settings.load()["version"]
+            showDialog = settings.load()["showDialog"]
+            autoEject = settings.load()["autoEject"]
+            playSound = settings.load()["playSound"]
+        
+        def launcherUpdate() :
+            if launcher.installed(python_binary_location) :
+                launcherButton.text = "Launcher installed"
+                launcherButton.icon = ft.icons.CHECK_BOX_SHARP
+                launcherButton.disabled = True
+            else :
+                launcherButton.text = "Install Launcher"
+                launcherButton.icon = icons.CHECK_BOX_OUTLINE_BLANK_SHARP
+                launcherButton.on_click = lambda e: launcherInstall()
+
+        def launcherInstall() :
+            launcher.install(python_binary_location)
+            launcherUpdate()
+            updateInterface()
+
 
         def updateInterface() :
             t.tabs[0].content=ft.Column(dataLoader(),scroll=ft.ScrollMode.ADAPTIVE)
             launcherUpdate()
+            settingsUpdate()
             page.update()
 
 
@@ -135,15 +161,59 @@ else :
                             alignment=ft.MainAxisAlignment.END
                             )]))
             return mapTabs
-        
-        
-        
-        
-        
-       
-        
 
-        ##################################### MODALS ################################################
+        ##################################### MODALS #############################################
+        ####### SETTINGS 
+        def refreshUI() :
+            page.close(settingsManager)
+            updateInterface()
+            showNotification("UI refreshed.")
+        settingsTile = ft.Column([
+            ft.ListTile(
+                leading= ft.Icon(icons.DOWNLOAD_OUTLINED),
+                title= ft.Text("Export Configuration"),
+                subtitle=ft.Text("Export mappings configuration to folder."),
+                trailing=ft.TextButton("Select",icon=ft.icons.FOLDER)
+            ),
+            ft.ListTile(
+                leading= ft.Icon(icons.FILE_UPLOAD_OUTLINED),
+                title= ft.Text("Import Configuration"),
+                subtitle=ft.Text("Import mappings configuration from JSON file."),
+                trailing=ft.TextButton("Select",icon=ft.icons.FILE_UPLOAD_OUTLINED)
+            ),
+            ft.ListTile(
+                leading= ft.Icon(icons.SPEAKER_NOTES_OFF_OUTLINED),
+                title= ft.Text("Show Dialog"),
+                subtitle=ft.Text("Show pop up when inserting SD card?"),
+                trailing=ft.Checkbox(value=showDialog,on_change=lambda e: settings.toggleCheckbox("showDialog"))
+            ),
+            ft.ListTile(
+                leading= ft.Icon(icons.EJECT_OUTLINED),
+                title= ft.Text("Auto Eject"),
+                subtitle=ft.Text("Automatically eject SD card after completion?"),
+                trailing=ft.Checkbox(value=autoEject,on_change=lambda e: settings.toggleCheckbox("autoEject"))
+            ),
+            ft.ListTile(
+                leading= ft.Icon(icons.HEADSET_OUTLINED),
+                title= ft.Text("Play Sound"),
+                subtitle=ft.Text("Play sound after completion?"),
+                trailing=ft.Checkbox(value=playSound,on_change=lambda e: settings.toggleCheckbox("playSound"))
+            ),
+            ft.ListTile(
+                leading= ft.Icon(icons.REFRESH_OUTLINED),
+                title= ft.Text("Refresh UI"),
+                subtitle=ft.Text("Get the freshest data out there"),
+                trailing=ft.TextButton("Refresh",on_click=lambda e: refreshUI())
+            )
+        ])
+        settingsManager = ft.AlertDialog(
+                content=settingsTile,
+                title=ft.Text("Settings"),
+                actions=[ft.TextButton("Close", on_click=lambda e: page.close(settingsManager))],
+                actions_alignment=ft.MainAxisAlignment.END,
+                scrollable=True
+            )
+
         ####### UPDATE MANAGER
         updateTile = ft.ListTile(
                             leading= ft.Icon(ft.icons.UPDATE_OUTLINED),
@@ -193,7 +263,7 @@ else :
                 ft.PopupMenuButton(
                     icon_color=MAIN_COLOR,
                     items=[
-                        ft.PopupMenuItem(text="Settings",icon=ft.icons.SETTINGS,on_click=lambda e: updateInterface()),
+                        ft.PopupMenuItem(text="Settings",icon=ft.icons.SETTINGS,on_click=lambda e: page.open(settingsManager)),
                         ft.PopupMenuItem(text="Github",icon=ft.icons.WEB),
                         ft.PopupMenuItem(text="Check update",icon=ft.icons.UPDATE,on_click=lambda e:  page.open(updateManager)),
                     ]
@@ -232,22 +302,6 @@ else :
         
         ############################### BUILD #################################
 
-        
-        
-        def launcherUpdate() :
-            if launcher.installed(python_binary_location) :
-                launcherButton.text = "Launcher installed"
-                launcherButton.icon = ft.icons.CHECK_BOX_SHARP
-                launcherButton.disabled = True
-            else :
-                launcherButton.text = "Install Launcher"
-                launcherButton.icon = icons.CHECK_BOX_OUTLINE_BLANK_SHARP
-                launcherButton.on_click = lambda e: launcherInstall()
-
-        def launcherInstall() :
-            launcher.install(python_binary_location)
-            launcherUpdate()
-            updateInterface()
         
         updateInterface()
         page.add(t)

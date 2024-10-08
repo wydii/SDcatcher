@@ -13,9 +13,9 @@ SETTINGS_PATH = os.path.join(base_dir, 'settings.json')
 VERSION = "0.5"
 DEFAULT_SETTINGS = {
         "mappings": [],
-        "showDialog": "true",
-        "autoEject": "false",
-        "playSound": "false",
+        "showDialog": True,
+        "autoEject": False,
+        "playSound": False,
         "version": VERSION
     }
 
@@ -112,7 +112,7 @@ def removeMapping(uuid):
             newMappings.append(mapping)
     
     if len(newMappings) == len(settings["mappings"]):
-        return
+        print("Mapping not found")
     else:
         
         settings["mappings"] = newMappings
@@ -154,5 +154,9 @@ def exportSettings(export_directory):
     
     print(f"Settings exported to '{export_directory}' successfully.")
 
+#######################  CHECKBOXES ###########################
 
-removeMapping("e79152f5-06c6-4fe9-87c2-c7807f5a07f2")
+def toggleCheckbox(setting) :
+    settings = load()
+    settings[setting] = not(settings[setting])
+    saveSettings(settings)
