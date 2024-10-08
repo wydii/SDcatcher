@@ -21,9 +21,10 @@ def loader(mappings):
 
 
         # Variables
+        buttonstyle =ft.ButtonStyle(color=ft.colors.INDIGO_300)
         message = ft.Text("Copying media")
-        ejectButton = ft.TextButton("",disabled=True)
-        button = ft.TextButton("Minimize",on_click= lambda e: minimize())
+        ejectButton = ft.TextButton("",disabled=True, style= buttonstyle )
+        button = ft.TextButton("Minimize",on_click= lambda e: minimize(), style=buttonstyle)
         mappingTitle = ft.Text("")
         initialCard = ft.ListTile(
                                 leading=ft.ProgressRing(width=24, height=24, stroke_width = 2),
@@ -68,7 +69,6 @@ def loader(mappings):
                 if os.path.basename(media)[-4:].lower() in mapping["format"].split(',') and os.path.basename(media)[0] != '.' :
                     clipAbsPath = mapping["sourcePath"]+media
                     destAbsPath = mapping["destinationPath"]+media
-                    print ("MEDIA FOUND :",media)
                     if not os.path.exists(destAbsPath) :
                         message.value = "Copying " + media 
                         page.update()
@@ -78,7 +78,7 @@ def loader(mappings):
         mappingTitle.value = mapping["name"] +" Mapping"
         message.value = "Media were copied successfully"
         button.text = "Close"
-        initialCard.leading = ft.Icon(name=ft.icons.FAVORITE, color=ft.colors.GREEN)
+        initialCard.leading = ft.Icon(name=ft.icons.FAVORITE, color=ft.colors.INDIGO_300)
         button.on_click = lambda e: page.window.close()
         ejectButton.text = "Eject"
         ejectButton.icon = ft.icons.EJECT
