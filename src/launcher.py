@@ -1,16 +1,28 @@
 import plistlib
-import os, platform
+import os
+from platforms import getPlatform
 
 argument = "dialog"
+launch_agents_dir = os.path.join(os.environ.get("HOME"), "Library", "LaunchAgents")
+pl_path = os.path.join(launch_agents_dir, "com.sdcatcher.insert.plist")
+
+
+def installed(pythonBin) :
+    if getPlatform() == "Darwin" :
+        installedBin = 0
+        if os.path.exists(pl_path) :
+            with open(pl_path,'rb') as pl :
+                installedBin = plistlib.load(pl)['ProgramArguments'][0] == pythonBin
+        return os.path.exists(pl_path) and installedBin
 
 def install(pythonBin):
-    if platform.system() == "Darwin":
-        launch_agents_dir = os.path.join(os.environ.get("HOME"), "Library", "LaunchAgents")
+    if getPlatform() == "Darwin":
+        
         
         # Create the LaunchAgents folder if it doesn't exist
         os.makedirs(launch_agents_dir, exist_ok=True)
         
-        pl_path = os.path.join(launch_agents_dir, "com.sdcatcher.insert.plist")
+        
         pl = {
             'Label': 'com.sdcatcher.sdcards',
             'ProgramArguments': [pythonBin, argument],

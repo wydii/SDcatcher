@@ -101,7 +101,7 @@ def modifyMapping(uuid, new_mapping):
             print(f"Mapping '{name}' modified successfully.")
             return
     
-    print(f"Mapping not found.")
+    print(f"Mapping not found. 1")
 
 def removeMapping(uuid):
     """Removes a mapping by uuid."""
@@ -112,7 +112,7 @@ def removeMapping(uuid):
             newMappings.append(mapping)
     
     if len(newMappings) == len(settings["mappings"]):
-        print(f"Mapping not found.")
+        return
     else:
         
         settings["mappings"] = newMappings

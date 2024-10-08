@@ -1,6 +1,5 @@
 import os,platform,subprocess
 import autorun
-from tqdm import tqdm
 
 
 
@@ -49,8 +48,6 @@ def copy_with_progress(src, dst):
     with open(src, 'rb') as fsrc:
         # Open the destination file in binary mode
         with open(dst, 'wb') as fdst:
-            # Create a progress bar with total size
-            progress = tqdm(total=total_size, unit='B', unit_scale=True)
             # Copy the file chunk by chunk
             while True:
                 # Read a chunk of data from the source file
@@ -60,11 +57,6 @@ def copy_with_progress(src, dst):
                     break
                 # Write the chunk to the destination file
                 fdst.write(chunk)
-                # Update the progress bar with the chunk size
-                progress.update(len(chunk))
-            # Close the progress bar
-            progress.close()
-
 
 
 

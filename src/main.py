@@ -22,6 +22,13 @@ else :
         
 
         versionData = settings.load()["version"]
+        launcherButton = ft.TextButton()
+
+        def updateInterface() :
+            t.tabs[0].content=ft.Column(dataLoader(),scroll=ft.ScrollMode.ADAPTIVE)
+            launcherUpdate()
+            page.update()
+
 
         def showNotification(notificationMessage,undo=None) :
             def undoManager(e,undo) :
@@ -29,12 +36,12 @@ else :
                 snackbar.duration=1
                 snackbar.show_close_icon=False
                 snackbar.open=True
-                updateMappings()
+                updateInterface()
             textContent = ft.Text(notificationMessage,color=ft.colors.BLACK)
-            undoButton = ft.TextButton("Undo",icon=ft.icons.UNDO_OUTLINED,style=ButtonStyle(),on_click=lambda e:undoManager(e,undo))
+            undoButton = ft.TextButton("Undo",icon=ft.icons.UNDO_OUTLINED,style=ButtonStyle(color=MAIN_COLOR),on_click=lambda e:undoManager(e,undo))
             snackbar = ft.SnackBar(
                 content="",
-                bgcolor=ft.colors.BLUE_GREY_100,
+                bgcolor=ft.colors.INDIGO_50,
                 show_close_icon=True,
                 close_icon_color=ft.colors.BLACK,                
                 #behavior=ft.SnackBarBehavior.FLOATING
@@ -49,23 +56,19 @@ else :
             page.update()
 
         ##################################### MAPPING CONTROLS ##################################
-        def updateMappings() :
-            dataLoader()
-            t.tabs[0].content=ft.Column(dataLoader(),scroll=ft.ScrollMode.ADAPTIVE)
-            page.update()
+       
         
         def fooCreate() :
             settings.createNewMapping("ZV1","/Volumes/ZV1/PRIVATE/M4ROOT/CLIP/","/Users/yehdar/Pictures/ZV1/CLIPS/","video",".mp4")
             settings.createNewMapping("ZV1","/Volumes/ZV1/DCIM/100MSDCF/","/Users/yehdar/Pictures/ZV1/PICS/","photo",".jpg")
-            updateMappings()
+            updateInterface()
             showNotification("Mappings Created")
         
         def removeMapping(uuid) :
-            print("Got a signal to delete UUID : ",uuid)
             mapping = settings.getMapping(uuid)
             undo = lambda e: settings.createNewMapping(mapping["name"], mapping["sourcePath"], mapping["destinationPath"], mapping["type"], mapping["format"])
             settings.removeMapping(uuid)
-            updateMappings()
+            updateInterface()
             showNotification("Removed mapping for "+mapping["name"]+" of type "+mapping["type"],undo)
         ##################################### SETTINGS LOADER ###################################
         
@@ -85,7 +88,7 @@ else :
                 icon = ft.icons.PHOTO_CAMERA if type=="photo" else ft.icons.MOVIE
                 description = "Picture Mapping" if type =="photo" else "Video Mapping"
 
-                removeLambda = lambda e, uuid=uuid: removeMapping(uuid)
+                
                
                 
                 styleDict = [("Source :",source),("Destination :",destination),("Format :",format)]
@@ -102,7 +105,7 @@ else :
                                         icon=ft.icons.MORE_VERT,
                                             items=[
                                                 ft.PopupMenuItem(text="Modify",icon=ft.icons.EDIT),
-                                                ft.PopupMenuItem(text="Remove",icon=ft.icons.REMOVE,on_click=removeLambda),
+                                                ft.PopupMenuItem(text="Remove",icon=ft.icons.REMOVE,on_click=lambda e, uuid=uuid: removeMapping(uuid)),
                                             ],
                                         )),
                         subtitle=ft.Text(description),
@@ -190,7 +193,7 @@ else :
                 ft.PopupMenuButton(
                     icon_color=MAIN_COLOR,
                     items=[
-                        ft.PopupMenuItem(text="Settings",icon=ft.icons.SETTINGS),
+                        ft.PopupMenuItem(text="Settings",icon=ft.icons.SETTINGS,on_click=lambda e: updateInterface()),
                         ft.PopupMenuItem(text="Github",icon=ft.icons.WEB),
                         ft.PopupMenuItem(text="Check update",icon=ft.icons.UPDATE,on_click=lambda e:  page.open(updateManager)),
                     ]
@@ -214,19 +217,13 @@ else :
                 ft.Tab(
                     text="My Mappings",
                     icon=ft.icons.LIST_ALT,
-                    content=ft.Column(dataLoader(),scroll=ft.ScrollMode.ADAPTIVE),
                     
                     
                 ),
                 ft.Tab(
                     text="Feedback",
                     icon=ft.icons.FEEDBACK,
-                    content=ft.Column(
-                        [
-                                    
-                        ]
-                        
-                        
+                    content=ft.Column(                        
                         )
                 ),
             ],
@@ -235,5 +232,24 @@ else :
         
         ############################### BUILD #################################
 
+        
+        
+        def launcherUpdate() :
+            if launcher.installed(python_binary_location) :
+                launcherButton.text = "Launcher installed"
+                launcherButton.icon = ft.icons.CHECK_BOX_SHARP
+                launcherButton.disabled = True
+            else :
+                launcherButton.text = "Install Launcher"
+                launcherButton.icon = icons.CHECK_BOX_OUTLINE_BLANK_SHARP
+                launcherButton.on_click = lambda e: launcherInstall()
+
+        def launcherInstall() :
+            launcher.install(python_binary_location)
+            launcherUpdate()
+            updateInterface()
+        
+        updateInterface()
         page.add(t)
+        page.add(launcherButton)
     ft.app(main)

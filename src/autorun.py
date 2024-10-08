@@ -1,24 +1,29 @@
 import flet as ft
 import os,platforms
 
-def minimize(page: ft.Page) :
-    page.window.minimized = True
-    page.update()
 
-def eject(page : ft.Page,volumeName) :
-    if platforms.getPlatform() == "Darwin" :
-        command = "diskutil eject "+volumeName
-        print("Attempting : "+command)
-        os.system(command)
-    page.window.close()
+
 
 def loader(mappings):
     def progressBar(page: ft.Page) :
+        def minimize() :
+            page.window.minimized = True
+            page.update()
+
+        def eject(volumeName) :
+            if platforms.getPlatform() == "Darwin" :
+                command = "diskutil eject "+volumeName
+                ejectButton.text = "Ejecting ..."
+                ejectButton.disabled = True
+                page.update()
+                os.system(command)
+            page.window.close()
+
 
         # Variables
         message = ft.Text("Copying media")
         ejectButton = ft.TextButton("",disabled=True)
-        button = ft.TextButton("Minimize",on_click= lambda e: minimize(page))
+        button = ft.TextButton("Minimize",on_click= lambda e: minimize())
         mappingTitle = ft.Text("")
         initialCard = ft.ListTile(
                                 leading=ft.ProgressRing(width=24, height=24, stroke_width = 2),
@@ -78,7 +83,7 @@ def loader(mappings):
         ejectButton.text = "Eject"
         ejectButton.icon = ft.icons.EJECT
         ejectButton.disabled = False
-        ejectButton.on_click = lambda e: eject(page,volumeName)
+        ejectButton.on_click = lambda e: eject(volumeName)
         
         page.update()
 
