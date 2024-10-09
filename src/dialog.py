@@ -11,7 +11,7 @@ def dialog() :
         
         ### SD card plugged 
         else :                                       
-            if settings.showDialog() :
+            if settings.load()["showDialog"] :
                 userInterraction = platforms.dialog(mappings) 
                 
                 if not userInterraction :

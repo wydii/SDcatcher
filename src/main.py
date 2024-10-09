@@ -305,10 +305,6 @@ else :
         
         updateInterface()
         page.add(t)
-        #page.add(launcherButton)
-        interface = ft.Audio(src=f"interface.mp3")
-        page.overlay.append(interface)
-        page.add(
-            ft.TextButton("Play Sound",on_click=lambda e: interface.play())
-        )
+        page.add(launcherButton)
+        
     ft.app(main, assets_dir="assets")

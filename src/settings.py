@@ -66,11 +66,6 @@ def checkVolume():
 
 
 
-def showDialog():
-    """ Boolean value for the showDialog option"""
-    settings = load()
-    return settings.get("showDialog", "false").lower() == "true"
-
 ############################    CREATE, MODIFY, REMOVE & GET    ##############################################################
 
 def createNewMapping(name, sourcePath, destinationPath, type, format):

@@ -1,4 +1,5 @@
 import flet as ft
+from flet import *
 import os,platforms
 from settings import load
 
@@ -6,18 +7,31 @@ from settings import load
 
 def loader(mappings):
     def progressBar(page: ft.Page) :
+
+        ejectAudio = ft.Audio(src=f"cassette-eject.mp3",autoplay=True,on_seek_complete=lambda _:page.window.close())
+        completeAudio = ft.Audio(src=f"interface.mp3",autoplay=True)
+        
+        
+        
         def minimize() :
             page.window.minimized = True
             page.update()
 
         def eject(volumeName) :
+            
             if platforms.getPlatform() == "Darwin" :
                 command = "diskutil eject "+volumeName
                 ejectButton.text = "Ejecting ..."
                 ejectButton.disabled = True
                 page.update()
                 os.system(command)
-            page.window.close()
+            
+            if load()["playSound"] :        
+                page.overlay.append(ejectAudio)
+                page.update()
+
+            else :
+                page.window.close()
 
 
         # Variables
@@ -33,6 +47,7 @@ def loader(mappings):
                             )
         volumeName = ""
         
+
         #Settings
         page.window.bgcolor = ft.colors.TRANSPARENT
         page.bgcolor = ft.colors.TRANSPARENT
@@ -72,7 +87,7 @@ def loader(mappings):
                     if not os.path.exists(destAbsPath) :
                         message.value = "Copying " + media 
                         page.update()
-                        copy_with_progress(clipAbsPath, destAbsPath)
+                        platforms.copy_with_progress(clipAbsPath, destAbsPath)
 
         
         mappingTitle.value = mapping["name"] +" Mapping"
@@ -85,13 +100,17 @@ def loader(mappings):
         ejectButton.disabled = False
         ejectButton.on_click = lambda e: eject(volumeName)
 
+        
+        
+        if load()["playSound"] :
+            page.overlay.append(completeAudio)
+
         if load()["autoEject"] :
             eject(volumeName)
-        if load()["playAudio"] :
-            ft.Audio(src="assets/interface.mp3").play()
+       
         page.update()
 
-    ft.app(progressBar)
+    ft.app(progressBar, assets_dir="assets")
     
 
 
