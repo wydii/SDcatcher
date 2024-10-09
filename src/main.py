@@ -182,7 +182,7 @@ else :
                 trailing=ft.TextButton("Select",icon=ft.icons.FILE_UPLOAD_OUTLINED)
             ),
             ft.ListTile(
-                leading= ft.Icon(icons.SPEAKER_NOTES_OFF_OUTLINED),
+                leading= ft.Icon(icons.SPEAKER_NOTES_OUTLINED),
                 title= ft.Text("Show Dialog"),
                 subtitle=ft.Text("Show pop up when inserting SD card?"),
                 trailing=ft.Checkbox(value=showDialog,on_change=lambda e: settings.toggleCheckbox("showDialog"))
@@ -305,5 +305,10 @@ else :
         
         updateInterface()
         page.add(t)
-        page.add(launcherButton)
-    ft.app(main)
+        #page.add(launcherButton)
+        interface = ft.Audio(src=f"interface.mp3")
+        page.overlay.append(interface)
+        page.add(
+            ft.TextButton("Play Sound",on_click=lambda e: interface.play())
+        )
+    ft.app(main, assets_dir="assets")

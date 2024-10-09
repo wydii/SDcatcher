@@ -1,9 +1,9 @@
 import os, json, uuid
 import flet as ft
-from platforms import getPlatform
+import platform
 
 # Cross-platform settings file path
-if getPlatform() == "Windows":
+if platform.system() == "Windows":
     base_dir = os.path.join(os.path.expanduser('~'), 'AppData', 'Local', 'sdcatcher')
 else:
     base_dir = os.path.join(os.path.expanduser('~'), '.sdcatcher')

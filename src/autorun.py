@@ -1,6 +1,6 @@
 import flet as ft
 import os,platforms
-
+from settings import load
 
 
 
@@ -72,7 +72,7 @@ def loader(mappings):
                     if not os.path.exists(destAbsPath) :
                         message.value = "Copying " + media 
                         page.update()
-                        platforms.copy_with_progress(clipAbsPath, destAbsPath)
+                        copy_with_progress(clipAbsPath, destAbsPath)
 
         
         mappingTitle.value = mapping["name"] +" Mapping"
@@ -84,7 +84,11 @@ def loader(mappings):
         ejectButton.icon = ft.icons.EJECT
         ejectButton.disabled = False
         ejectButton.on_click = lambda e: eject(volumeName)
-        
+
+        if load()["autoEject"] :
+            eject(volumeName)
+        if load()["playAudio"] :
+            ft.Audio(src="assets/interface.mp3").play()
         page.update()
 
     ft.app(progressBar)
