@@ -144,10 +144,14 @@ def exportSettings(export_directory):
     """Exports the current settings to a specified directory."""
     settings = load()
     export_path = os.path.join(export_directory,"settings.json")
-    with open(export_path, 'w') as f:
-        json.dump(settings, f, indent=4)
-    
-    print(f"Settings exported to '{export_directory}' successfully.")
+    try :
+        with open(export_path, 'w') as f:
+            json.dump(settings, f, indent=4)
+        result = f"Settings exported to '{export_directory}' successfully."
+        print(result)
+        return result
+    except Exception as e :
+        return ("Export error: ",e)
 
 #######################  CHECKBOXES ###########################
 

@@ -63,19 +63,17 @@ else :
                 snackbar.show_close_icon=False
                 snackbar.open=True
                 updateInterface()
-            textContent = ft.Text(notificationMessage,color=ft.colors.BLACK)
             undoButton = ft.TextButton("Undo",icon=ft.icons.UNDO_OUTLINED,style=ButtonStyle(color=MAIN_COLOR),on_click=lambda e:undoManager(e,undo))
             snackbar = ft.SnackBar(
-                content="",
+                content=ft.Row([ft.Text(notificationMessage,color=ft.colors.BLACK)]),
                 bgcolor=ft.colors.INDIGO_50,
                 show_close_icon=True,
-                close_icon_color=ft.colors.BLACK,                
-                #behavior=ft.SnackBarBehavior.FLOATING
+                close_icon_color=ft.colors.INDIGO_300,
+                behavior=ft.SnackBarBehavior.FLOATING
                 )
             if undo!=None :
-                snackbar.content=ft.Row([textContent,undoButton],alignment=ft.MainAxisAlignment.START)
-            else :
-                snackbar.content = ft.Row([textContent],alignment=ft.MainAxisAlignment.START)
+                snackbar.content.controls.append(undoButton)
+            
                 
             page.overlay.append(snackbar)
             snackbar.open=True
@@ -168,12 +166,20 @@ else :
             page.close(settingsManager)
             updateInterface()
             showNotification("UI refreshed.")
+        def get_directory_result(e: FilePickerResultEvent):
+            if e.path :
+                result = settings.exportSettings(e.path)
+                page.close(settingsManager)
+                showNotification(result)
+
+        get_export_dir = FilePicker(on_result=get_directory_result)
+        page.overlay.extend([get_export_dir])
         settingsTile = ft.Column([
             ft.ListTile(
                 leading= ft.Icon(icons.DOWNLOAD_OUTLINED),
                 title= ft.Text("Export Configuration"),
                 subtitle=ft.Text("Export mappings configuration to folder."),
-                trailing=ft.TextButton("Select",icon=ft.icons.FOLDER)
+                trailing=ft.TextButton("Select",icon=ft.icons.FOLDER,on_click=lambda e: get_export_dir.get_directory_path())
             ),
             ft.ListTile(
                 leading= ft.Icon(icons.FILE_UPLOAD_OUTLINED),
