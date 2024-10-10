@@ -272,7 +272,7 @@ else :
                 wizard = ft.Column(
                                     [
                                         ft.ListTile(
-                                            title=ft.Text("Start by inserting an SD Card",color=colors.BLACK),
+                                            title=ft.Text("Start by inserting an SD Card",color=MAIN_COLOR),
                                             leading=ft.Icon(icons.HELP_OUTLINE,color=MAIN_COLOR)),
                                         refreshButton ],
                                         alignment=MainAxisAlignment.CENTER,
