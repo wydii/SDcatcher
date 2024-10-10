@@ -1,6 +1,6 @@
 import flet as ft
 from flet import *
-import launcher,dialog,settings
+import launcher,dialog,settings,platforms
 import os,sys,time
 
 # Get the path of the currently running Python interpreter
@@ -150,7 +150,7 @@ else :
                             content=ft.Container(
                                 content=ft.Column([
                                         ft.ListTile(
-                                            leading=ft.Icon(ft.icons.SD_CARD_ALERT_OUTLINED,color=ft.colors.BLACK),
+                                            leading=ft.Icon(ft.icons.HELP_OUTLINE,color=ft.colors.BLACK),
                                             title=ft.Text("Create your first Mapping !",color=ft.colors.BLACK),
                                             subtitle=ft.Container(content=ft.Text(
                                                 "Click on the button down there to create your first SD card automation.",color=ft.colors.BLACK ),padding=ft.padding.symmetric(vertical=10))
@@ -256,15 +256,48 @@ else :
                 actions_alignment=ft.MainAxisAlignment.END,
             )
         ####### ADD MAPPING MODAL
-        mappingTile = ft.Column()
-        mappingActions = [ft.TextButton("Close", on_click=lambda e: page.close(mappingManager)),
+        def addMappings() :
+            mappingActions = [ft.TextButton("Close", on_click=lambda e: page.close(mappingManager)),
                           ft.OutlinedButton("Save Mapping",icon=icons.SAVE_ALT_OUTLINED)
                           ]
-        mappingManager = ft.AlertDialog(
-            content=mappingTile,
+            mappingManager = ft.AlertDialog(
+            title=ft.Text("Add a Mapping"),
             actions=mappingActions,
-            actions_alignment=ft.MainAxisAlignment.END,
-        )
+            actions_alignment=ft.MainAxisAlignment.START,
+            )
+            
+            def getPotentialMappings() :
+                candidates = platforms.getPluggedVolumes()
+                refreshButton = ft.Row([ft.TextButton("Refresh",icon=icons.REFRESH_OUTLINED,style=ButtonStyle(color=MAIN_COLOR),on_click= lambda e:addMappings())],alignment=MainAxisAlignment.END)
+                wizard = ft.Column(
+                                    [
+                                        ft.ListTile(
+                                            title=ft.Text("Start by inserting an SD Card",color=colors.BLACK),
+                                            leading=ft.Icon(icons.HELP_OUTLINE,color=MAIN_COLOR)),
+                                        refreshButton ],
+                                        alignment=MainAxisAlignment.CENTER,
+                                        spacing=5,
+                                        height=100
+                                        )
+                if len(candidates) == 0 :
+                    mappingManager.content = wizard
+                    mappingActions.pop()
+                    
+                else:
+                    mappingManager.content = ft.Column()
+                    for volume in candidates :
+                        mappingManager.content.controls.append(ft.Text(volume))
+                    mappingManager.content.controls.append(refreshButton)
+                    
+
+            getPotentialMappings()
+            refreshUI()
+            page.open(mappingManager)
+
+                
+        
+        
+       
         ##################################### ACTION BUTTON - ADD MAPPING #######################
         
         page.floating_action_button = ft.FloatingActionButton(
@@ -275,19 +308,18 @@ else :
         shape=ft.RoundedRectangleBorder(radius=5),
         width=200,
         mini=True,
-        on_click=lambda e: fooCreate()
+        on_click=lambda e: addMappings()
     )        
         ############################## APP BAR ##################################################        
 
         page.appbar = ft.AppBar(
-            leading=ft.Icon(ft.icons.SD_CARD_SHARP,color=MAIN_COLOR),
-            leading_width=100,
-            title=ft.Text("SDcatcher",color=MAIN_COLOR),
-            center_title=False,
-            bgcolor=ft.colors.SURFACE_VARIANT,
+            leading=ft.Icon(ft.icons.SD_CARD_SHARP,color=ft.colors.WHITE),
+            title=ft.Text("SDcatcher",color=ft.colors.WHITE),
+            center_title=True,
+            bgcolor=MAIN_COLOR,
             actions=[
                 ft.PopupMenuButton(
-                    icon_color=MAIN_COLOR,
+                    icon_color=ft.colors.WHITE,
                     items=[
                         ft.PopupMenuItem(text="Settings",icon=ft.icons.SETTINGS,on_click=lambda e: page.open(settingsManager)),
                         ft.PopupMenuItem(text="Github",icon=ft.icons.WEB),

@@ -1,6 +1,6 @@
 import os,platform,subprocess
 import autorun
-
+import psutil
 
 
 
@@ -16,6 +16,15 @@ def volumeNotFound() :
         show_notification("Volume not found", "No registerd SD card has been found.")
 
 
+def getPluggedVolumes() :
+    allDisks = psutil.disk_partitions(all=False)
+    result = []
+    if getPlatform() == "Darwin" :
+        for drive in allDisks:
+            if drive.mountpoint.split("/")[1] == "Volumes" and drive.fstype != "apfs":
+                result.append(drive.mountpoint)
+
+    return result
 
 
 def dialog(mappings) :
