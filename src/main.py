@@ -47,7 +47,7 @@ else :
         def launcherInstall() :
             launcher.install(python_binary_location)
             launcherUpdate()
-            updateInterface()
+            refreshUI()
 
 
         def updateInterface() :
@@ -56,6 +56,12 @@ else :
             settingsUpdate()
             page.update()
 
+        def refreshUI(message=None,undo=None) :
+            if settingsManager.open:
+                page.close(settingsManager)
+            updateInterface()
+            if message :
+                showNotification(message,undo)
 
         def showNotification(notificationMessage,undo=None) :
             def undoManager(e,undo) :
@@ -86,15 +92,13 @@ else :
         def fooCreate() :
             settings.createNewMapping("ZV1","/Volumes/ZV1/PRIVATE/M4ROOT/CLIP/","/Users/yehdar/Pictures/ZV1/CLIPS/","video",".mp4")
             settings.createNewMapping("ZV1","/Volumes/ZV1/DCIM/100MSDCF/","/Users/yehdar/Pictures/ZV1/PICS/","photo",".jpg")
-            updateInterface()
-            showNotification("Mappings Created")
+            refreshUI("Mappings Created")
         
         def removeMapping(uuid) :
             mapping = settings.getMapping(uuid)
             undo = lambda e: settings.createNewMapping(mapping["name"], mapping["sourcePath"], mapping["destinationPath"], mapping["type"], mapping["format"])
             settings.removeMapping(uuid)
-            updateInterface()
-            showNotification("Removed mapping for "+mapping["name"]+" of type "+mapping["type"],undo)
+            refreshUI("Removed mapping for "+mapping["name"]+" of type "+mapping["type"],undo)
         ##################################### SETTINGS LOADER ###################################
         
 
@@ -163,10 +167,7 @@ else :
 
         ##################################### MODALS #############################################
         ####### SETTINGS 
-        def refreshUI(message) :
-            page.close(settingsManager)
-            updateInterface()
-            showNotification(message)
+       
 
         def exportConfiguration(e: FilePickerResultEvent):
             if e.path :
@@ -252,7 +253,16 @@ else :
                 actions=updateActions,
                 actions_alignment=ft.MainAxisAlignment.END,
             )
-        
+        ####### ADD MAPPING MODAL
+        mappingTile = ft.Column()
+        mappingActions = [ft.TextButton("Close", on_click=lambda e: page.close(mappingManager)),
+                          ft.OutlinedButton("Save Mapping",icon=icons.SAVE_ALT_OUTLINED)
+                          ]
+        mappingManager = ft.AlertDialog(
+            content=mappingTile,
+            actions=mappingActions,
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
         ##################################### ACTION BUTTON - ADD MAPPING #######################
         
         page.floating_action_button = ft.FloatingActionButton(
