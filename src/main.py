@@ -68,15 +68,17 @@ else :
                 undo(e)
                 snackbar.duration=1
                 snackbar.show_close_icon=False
+                snackbar.disabled=True
+                snackbar.content=ft.Text("Undoing . . .",color=colors.BLACK)
                 snackbar.open=True
                 updateInterface()
             undoButton = ft.TextButton("Undo",icon=ft.icons.UNDO_OUTLINED,style=ButtonStyle(color=MAIN_COLOR),on_click=lambda e:undoManager(e,undo))
             snackbar = ft.SnackBar(
-                content=ft.Row([ft.Text(notificationMessage,color=ft.colors.BLACK)]),
+                content=ft.Row([ft.Text(notificationMessage,color=ft.colors.BLACK)],wrap=True),
                 bgcolor=ft.colors.INDIGO_50,
                 show_close_icon=True,
                 close_icon_color=ft.colors.INDIGO_300,
-                behavior=ft.SnackBarBehavior.FLOATING
+                behavior=ft.SnackBarBehavior.FLOATING,
                 )
             if undo!=None :
                 snackbar.content.controls.append(undoButton)
