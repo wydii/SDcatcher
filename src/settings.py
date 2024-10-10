@@ -11,6 +11,7 @@ else:
 # Global settings variables
 SETTINGS_PATH = os.path.join(base_dir, 'settings.json')
 VERSION = "0.5"
+REQUIRED_KEYS = {"mappings", "showDialog","autoEject","playSound"}
 DEFAULT_SETTINGS = {
         "mappings": [],
         "showDialog": True,
@@ -39,10 +40,15 @@ def load():
         if not os.path.exists(SETTINGS_PATH):
             installSettings()
             return DEFAULT_SETTINGS
-
+        
         else :       
             with open(SETTINGS_PATH) as f:
-                return json.load(f)
+                preResult = json.load(f)
+                if not REQUIRED_KEYS.issubset(preResult) :
+                    installSettings()
+                    return DEFAULT_SETTINGS
+                else :
+                    return preResult
             
     except Exception as e:
         print("Something went wrong during loading settings.json:", e)
@@ -130,8 +136,8 @@ def importSettings(json_file_path):
     with open(json_file_path, 'r') as f:
         new_settings = json.load(f)
     # Simple validation check for required fields
-    required_keys = {"mappings", "showDialog","autoEject","playSound"}
-    if not required_keys.issubset(new_settings):
+    
+    if not REQUIRED_KEYS.issubset(new_settings):
         result = "Invalid settings format."
         print(result)
         return result
