@@ -28,6 +28,7 @@ else :
 
 
         def settingsUpdate() :
+            global versionData,showDialog,autoEject,playSound
             versionData = settings.load()["version"]
             showDialog = settings.load()["showDialog"]
             autoEject = settings.load()["autoEject"]
@@ -162,18 +163,25 @@ else :
 
         ##################################### MODALS #############################################
         ####### SETTINGS 
-        def refreshUI() :
+        def refreshUI(message) :
             page.close(settingsManager)
             updateInterface()
-            showNotification("UI refreshed.")
-        def get_directory_result(e: FilePickerResultEvent):
+            showNotification(message)
+
+        def exportConfiguration(e: FilePickerResultEvent):
             if e.path :
                 result = settings.exportSettings(e.path)
-                page.close(settingsManager)
-                showNotification(result)
+                refreshUI(result)
+        
+        def importConfiguration(e : FilePickerResultEvent) :
+            if e.files :
+                result = settings.importSettings(e.files[0].path)
+                refreshUI(result)
 
-        get_export_dir = FilePicker(on_result=get_directory_result)
-        page.overlay.extend([get_export_dir])
+        get_export_dir = FilePicker(on_result=exportConfiguration)
+        get_import_file = FilePicker(on_result=importConfiguration)
+        page.overlay.extend([get_export_dir,get_import_file])
+
         settingsTile = ft.Column([
             ft.ListTile(
                 leading= ft.Icon(icons.DOWNLOAD_OUTLINED),
@@ -185,7 +193,7 @@ else :
                 leading= ft.Icon(icons.FILE_UPLOAD_OUTLINED),
                 title= ft.Text("Import Configuration"),
                 subtitle=ft.Text("Import mappings configuration from JSON file."),
-                trailing=ft.TextButton("Select",icon=ft.icons.FILE_UPLOAD_OUTLINED)
+                trailing=ft.TextButton("Select",icon=ft.icons.FILE_UPLOAD_OUTLINED,on_click=lambda e: get_import_file.pick_files("hello world",file_type=FilePickerFileType.CUSTOM,allowed_extensions=["json"]))
             ),
             ft.ListTile(
                 leading= ft.Icon(icons.SPEAKER_NOTES_OUTLINED),
@@ -209,7 +217,7 @@ else :
                 leading= ft.Icon(icons.REFRESH_OUTLINED),
                 title= ft.Text("Refresh UI"),
                 subtitle=ft.Text("Get the freshest data out there"),
-                trailing=ft.TextButton("Refresh",on_click=lambda e: refreshUI())
+                trailing=ft.TextButton("Refresh",on_click=lambda e: refreshUI("UI refreshed."))
             )
         ])
         settingsManager = ft.AlertDialog(

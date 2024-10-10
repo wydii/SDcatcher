@@ -127,18 +127,18 @@ def importSettings(json_file_path):
     if not os.path.exists(json_file_path):
         print(f"File '{json_file_path}' does not exist.")
         return
-
     with open(json_file_path, 'r') as f:
         new_settings = json.load(f)
-
     # Simple validation check for required fields
-    required_keys = {"mappings", "showDialog", "version"}
+    required_keys = {"mappings", "showDialog","autoEject","playSound"}
     if not required_keys.issubset(new_settings):
-        print("Invalid settings format.")
-        return
-
+        result = "Invalid settings format."
+        print(result)
+        return result
     saveSettings(new_settings)
-    print("Settings imported and applied successfully.")
+    result = "Settings imported and applied successfully."
+    print(result)
+    return result
 
 def exportSettings(export_directory):
     """Exports the current settings to a specified directory."""
