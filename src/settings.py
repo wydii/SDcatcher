@@ -132,15 +132,6 @@ def importSettings(json_file_path):
     """Imports and verifies the settings from a JSON file."""
     if not os.path.exists(json_file_path):
         print(f"File '{json_file_path}' does not exist.")
-<<<<<<< HEAD
-        return
-    with open(json_file_path, 'r') as f:
-        new_settings = json.load(f)
-    # Simple validation check for required fields
-    
-    if not REQUIRED_KEYS.issubset(new_settings):
-        result = "Invalid settings format."
-=======
         return ("An error occured during import")
     try :
         with open(json_file_path, 'r') as f:
@@ -153,7 +144,6 @@ def importSettings(json_file_path):
             return result
         saveSettings(new_settings)
         result = "Settings imported and applied successfully."
->>>>>>> ac485fb (Advances on the Add Mapping modal)
         print(result)
         return result
     except Exception as e :
