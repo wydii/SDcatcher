@@ -190,13 +190,13 @@ else :
                 leading= ft.Icon(icons.DOWNLOAD_OUTLINED),
                 title= ft.Text("Export Configuration"),
                 subtitle=ft.Text("Export mappings configuration to folder."),
-                trailing=ft.TextButton("Select",icon=ft.icons.FOLDER,on_click=lambda e: get_export_dir.get_directory_path())
+                trailing=ft.TextButton("Select",icon=ft.icons.FOLDER,on_click=lambda e: get_export_dir.get_directory_path("Select a folder where settings.json will be saved"))
             ),
             ft.ListTile(
                 leading= ft.Icon(icons.FILE_UPLOAD_OUTLINED),
                 title= ft.Text("Import Configuration"),
                 subtitle=ft.Text("Import mappings configuration from JSON file."),
-                trailing=ft.TextButton("Select",icon=ft.icons.FILE_UPLOAD_OUTLINED,on_click=lambda e: get_import_file.pick_files("hello world",file_type=FilePickerFileType.CUSTOM,allowed_extensions=["json"]))
+                trailing=ft.TextButton("Select",icon=ft.icons.FILE_UPLOAD_OUTLINED,on_click=lambda e: get_import_file.pick_files("Import a JSON Configuration file",file_type=FilePickerFileType.CUSTOM,allowed_extensions=["json"]))
             ),
             ft.ListTile(
                 leading= ft.Icon(icons.SPEAKER_NOTES_OUTLINED),
@@ -227,8 +227,9 @@ else :
                 content=settingsTile,
                 title=ft.Text("Settings"),
                 actions=[ft.TextButton("Close", on_click=lambda e: page.close(settingsManager))],
-                actions_alignment=ft.MainAxisAlignment.END,
-                scrollable=True
+                actions_alignment=ft.MainAxisAlignment.START,
+                scrollable=True,
+                surface_tint_color=MAIN_COLOR,
             )
 
         ####### UPDATE MANAGER
@@ -254,43 +255,98 @@ else :
                 content=updateTile,
                 actions=updateActions,
                 actions_alignment=ft.MainAxisAlignment.END,
+                surface_tint_color=MAIN_COLOR,
             )
         ####### ADD MAPPING MODAL
-        def addMappings() :
-            mappingActions = [ft.TextButton("Close", on_click=lambda e: page.close(mappingManager)),
-                          ft.OutlinedButton("Save Mapping",icon=icons.SAVE_ALT_OUTLINED)
-                          ]
-            mappingManager = ft.AlertDialog(
-            title=ft.Text("Add a Mapping"),
-            actions=mappingActions,
-            actions_alignment=ft.MainAxisAlignment.START,
+        def addIndicator(step) :
+                    stackIndicator = ft.Row([],alignment=MainAxisAlignment.CENTER)
+                    for i in range(3) :
+                        if step-1 == i :
+                            stackIndicator.controls.append(ft.Container(content=ft.CircleAvatar(bgcolor=colors.INDIGO_400, radius=5)))
+                        else :
+                            stackIndicator.controls.append(ft.Container(content=ft.CircleAvatar(bgcolor=colors.BLUE_GREY_200, radius=5)))
+                    return stackIndicator
+        
+        
+        
+        
+        pickedVolume = []
+        pickedType = []
+        def pickVolume(volumeFullPath) :
+            pickedVolume.append(volumeFullPath)
+            mappingController(2)
+
+        def selectPathsAndType(fullPath,type) :
+            pickedVolume.append(fullPath)
+            pickedType.append(type)
+            mappingController(3)
+
+        mappingManager = ft.AlertDialog(
+                title=ft.Text("Add a Mapping"),
+                actions=[],
+                actions_alignment=ft.MainAxisAlignment.START,
+                content = ft.Column,
+                surface_tint_color=MAIN_COLOR,
+                scrollable=True,
+                content_padding=ft.padding.only(30,30,30,90)
             )
+        
+        def mappingController(step) :
+            initialContent = ft.Column([addIndicator(1),
+                                    ft.ListTile(title=ft.Text("Insert at least one SD Card and refresh."),
+                                    leading=ft.Icon(icons.SIM_CARD_DOWNLOAD_OUTLINED,color=MAIN_COLOR))],
+                                    width=400,height=100,alignment=MainAxisAlignment.SPACE_BETWEEN)
+            initialActions = [ft.TextButton("Close", on_click=lambda e: page.close(mappingManager)),
+                          ft.TextButton("Refresh",icon=icons.REFRESH_OUTLINED,on_click= lambda e:mappingController(1))]
             
             def getPotentialMappings() :
                 candidates = platforms.getPluggedVolumes()
-                refreshButton = ft.Row([ft.TextButton("Refresh",icon=icons.REFRESH_OUTLINED,style=ButtonStyle(color=MAIN_COLOR),on_click= lambda e:addMappings())],alignment=MainAxisAlignment.END)
-                wizard = ft.Column(
-                                    [
-                                        ft.ListTile(
-                                            title=ft.Text("Start by inserting an SD Card",color=MAIN_COLOR),
-                                            leading=ft.Icon(icons.HELP_OUTLINE,color=MAIN_COLOR)),
-                                        refreshButton ],
-                                        alignment=MainAxisAlignment.CENTER,
-                                        spacing=5,
-                                        height=100
-                                        )
-                if len(candidates) == 0 :
-                    mappingManager.content = wizard
-                    mappingActions.pop()
-                    
-                else:
-                    mappingManager.content = ft.Column()
-                    for volume in candidates :
-                        mappingManager.content.controls.append(ft.Text(volume))
-                    mappingManager.content.controls.append(refreshButton)
-                    
+                if len(candidates)>0 :
 
-            getPotentialMappings()
+                    mappingManager.content.controls[1].title.value = "Choose one of the listed disk :"
+                    mappingManager.content.controls[1].leading.name = icons.ARROW_CIRCLE_DOWN_ROUNDED
+                    
+                    sdGrid = ft.Row(wrap=True,spacing=30)
+                    for volume in candidates :
+                        sdGrid.controls.append(
+                                            
+                                                ft.Column(
+                                                    [IconButton(icons.SD_CARD_OUTLINED,
+                                                                icon_size=65,icon_color=MAIN_COLOR,
+                                                                on_click=lambda e,volumeFullPath=volume: pickVolume(volumeFullPath),
+                                                                visual_density=VisualDensity.COMFORTABLE),
+                                                    Row([Text(volume.split("/")[-1],weight="bold",color=MAIN_COLOR)],wrap=True)]
+                                                    ))
+                    mappingManager.content.controls.append(sdGrid)
+
+
+            if step == 1 :
+                mappingManager.content = initialContent
+                mappingManager.actions = initialActions
+                getPotentialMappings()
+            if step == 2 :
+                
+                fullPath = pickedVolume.pop()
+                mappingManager.content.controls[0] = addIndicator(2)
+                mappingManager.content.controls[1].title = Text("Select type for : ",spans=[ft.TextSpan(fullPath.split("/")[-1],style=TextStyle(weight="bold"))])
+                mappingManager.content.controls[1].leading.name = icons.TYPE_SPECIMEN
+                mappingManager.content.controls[2] = ft.Row([ft.SegmentedButton(
+                    segments=[Segment("photo",label=Text("Photo"),icon=ft.Icon(icons.PHOTO)),Segment("video",label=Text("Video"),icon=ft.Icon(icons.VIDEO_CAMERA_FRONT_OUTLINED)),Segment("other",label=Text("Other"))],
+                    allow_empty_selection=False,
+                    selected={"photo"},
+                    show_selected_icon=False,
+                    on_change= lambda e : selectPathsAndType(fullPath,e.data)
+                )],alignment=MainAxisAlignment.CENTER)
+                mappingManager.actions = [ft.TextButton("Back",icon=icons.ARROW_BACK,on_click= lambda e:mappingController(1))]
+            if step == 3 :
+                fullPath = pickedVolume.pop()
+                type = pickedType.pop()
+                mappingManager.content.controls[0] = addIndicator(3)
+                mappingManager.content.controls[1].title = Text("Select format for : ",spans=[ft.TextSpan(fullPath.split("/")[-1],style=TextStyle(weight="bold"))])
+                mappingManager.content.controls[1].leading.name = icons.FORMAT_INDENT_INCREASE
+                mappingManager.content.controls[2] = Text("selcted type :"+type)
+                mappingManager.actions = [ft.TextButton("Back",icon=icons.ARROW_BACK,on_click= lambda e:mappingController(2))]
+                
             refreshUI()
             page.open(mappingManager)
 
@@ -308,7 +364,7 @@ else :
         shape=ft.RoundedRectangleBorder(radius=5),
         width=200,
         mini=True,
-        on_click=lambda e: addMappings()
+        on_click=lambda e: mappingController(1)
     )        
         ############################## APP BAR ##################################################        
 
